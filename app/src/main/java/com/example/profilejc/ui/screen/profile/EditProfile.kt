@@ -8,19 +8,18 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @Composable
-fun EditProfile(modifier: Modifier, onConfirm: () -> Unit, profileViewModel: ProfileViewModel) {
-    var name by remember {  mutableStateOf(profileViewModel.name)}
-    var surname by remember { mutableStateOf(profileViewModel.surname)}
-    var email by remember {mutableStateOf(profileViewModel.email)}
-    var isError by remember {  mutableStateOf(profileViewModel.isError)}
+fun EditProfile(modifier: Modifier, navigate: () -> Unit, profileViewModel: ProfileViewModel) {
+    // 1. Observamos el estado único del ViewModel
+    val uiState by profileViewModel.uiState.collectAsStateWithLifecycle()
+
+    // 2. Desestructuramos si quieres mantener la sintaxis corta que buscabas
+    val (name, surname, email, isError) = uiState
 
     Column(
         verticalArrangement = Arrangement.Center,
@@ -32,15 +31,15 @@ fun EditProfile(modifier: Modifier, onConfirm: () -> Unit, profileViewModel: Pro
         OutlinedTextField(
             label = { Text("Name") },
             value = name,
-            onValueChange = { changed: String -> name = changed })
+            onValueChange = { profileViewModel.onNameChange(it) })
         OutlinedTextField(
             label = { Text("Surname") },
             value = surname,
-            onValueChange = { changed: String -> surname = changed })
+            onValueChange = { profileViewModel.onSurnameChange(it) })
         OutlinedTextField(
             label = { Text("Email") },
             value = email,
-            onValueChange = { changed: String -> email = changed },
+            onValueChange = { profileViewModel.onEmailChange(it) },
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Email
             ),
@@ -51,15 +50,9 @@ fun EditProfile(modifier: Modifier, onConfirm: () -> Unit, profileViewModel: Pro
             },
         )
         Button(
-            onClick = {
-                isError = !profileViewModel.validateEmail(email)
-                if (!isError) {
-                    profileViewModel.updateData(newName = name, newSurname = surname, newEmail = email, newIsError = isError)
-                    onConfirm()
-                }
-            }
+            onClick = { profileViewModel.onSubmit(onSuccess = navigate) }
         ) {
-            Text("Submit")
+            Text("Confirm")
         }
     }
 }

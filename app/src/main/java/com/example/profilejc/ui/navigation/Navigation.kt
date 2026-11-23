@@ -33,7 +33,7 @@ fun Navigation(modifier: Modifier) {
         composable(Routes.EditProfile.route) {
             EditProfile(
                 modifier = modifier,
-                onConfirm = { navController.popBackStack() },
+                navigate = { navController.popBackStack() },
                 profileViewModel = profileViewModel
 
             )
